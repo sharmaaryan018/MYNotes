@@ -8,9 +8,15 @@ import Filter from "./Filter"; // Import the reusable Filter component
 import ViewNote from "./ViewNote";
 import Card from "./Card";
 
+
 const UserDetails = () => {
-  const { id } = useParams();
+
   const navigate = useNavigate();
+
+  const stringUser = localStorage.getItem("user");
+  const user = stringUser ? JSON.parse(stringUser) : null;
+  const { id } = user;
+  
 
   const [userDetails, setUserDetails] = useState(null);
   const [error, setError] = useState(null);

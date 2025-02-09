@@ -10,7 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Filter from "./Filter";
 import Card from "./Card";
 
-const Dashboard = () => {
+const BrowseNotes = () => {
   const navigate = useNavigate();
 
   const stringUser = localStorage.getItem("user");
@@ -177,4 +177,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default BrowseNotes;

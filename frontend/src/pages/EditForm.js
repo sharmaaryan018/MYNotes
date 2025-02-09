@@ -16,8 +16,8 @@ const EditForm = () => {
     description: userDetails?.description || "",
     file: userDetails?.file || "", // Existing file URL
     subject: userDetails?.subject || "",
-   Department: userDetails?. Department || "",
-
+    department: userDetails?.Department || "", // Ensure correct key
+    type: userDetails?.type  || "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,37 +40,32 @@ const EditForm = () => {
     updatedData.append("title", formData.title);
     updatedData.append("description", formData.description);
     updatedData.append("subject", formData.subject);
-    updatedData.append("Department", formData.Department);
+    updatedData.append("department", formData.department);
+    updatedData.append("type", formData.type);
 
-    // Check if a new file is selected
+    // Only append the file if a new file is selected
     if (formData.file && formData.file instanceof File) {
       updatedData.append("file", formData.file);
     }
-    const token = localStorage.getItem("token"); // Replace with the actual way you store/retrieve the token
+
+    const token = localStorage.getItem("token");
 
     try {
       const response = await axios.put(
         `http://localhost:5000/api/note/editNote/${userDetails._id}`,
-        formData,
+        updatedData, // Corrected
         {
-          headers: { "Content-Type": "multipart/form-data" ,          Authorization: `Bearer ${token}`,}
-          ,
+          headers: { 
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       console.log("Updated note response:", response.data);
 
-      // Update the form with the latest data
-      const updatedNote = response.data; // Assuming response contains the updated note
-      setFormData({
-        title: updatedNote.title,
-        description: updatedNote.description,
-        file: updatedNote.file, // Updated file URL
-        subject: updatedNote.subject,
-      });
-
       alert("Note updated successfully!");
-      navigate(-1); // Navigate back to the previous page
+      navigate(-1); // Navigate back
     } catch (err) {
       console.error("Failed to update the note:", err);
       alert("Failed to update the note.");
@@ -145,6 +140,16 @@ const EditForm = () => {
             type="text"
             name="subject"
             value={formData.subject}
+            onChange={handleChange}
+            className="w-full p-2 rounded bg-gray-700"
+          />
+        </div>
+        <div className="mb-4">
+          <label>Department:</label>
+          <input
+            type="text"
+            name="department"
+            value={formData.department}
             onChange={handleChange}
             className="w-full p-2 rounded bg-gray-700"
           />

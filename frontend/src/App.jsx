@@ -5,13 +5,15 @@ import Navbar from "./components/Navbar"
 import Home from "./pages/Home"
 import  Login from "./pages/Login"
 import Signup from "./pages/Signup"
-import Dashboard from "./pages/Dashboard"
+import Dashboard from "./pages/Dashboard";
+import BrowseNotes from "./pages/BrowseNotes"
 import UserDetails from "./pages/UserDetails";
 import EditForm from "./pages/EditForm";
 import About from "./pages/About";
 import ContactUs from "./pages/ContactUs";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CreateNotePage from "./pages/CreateNotePage";
+import MyProfile from "./pages/MyProfile";
 
 
 
@@ -40,19 +42,30 @@ function App() {
     <Route path = "/login" element = {<Login setIsLoggedIn={setIsLoggedIn}/>}/>
     <Route path = "/signup" element = {<Signup setIsLoggedIn={setIsLoggedIn}/>}/>
 
+    <Route 
+    path ="/dashboard"
+    element = {<ProtectedRoute>
+      <Dashboard/>
+    </ProtectedRoute>}>
     
-    <Route path = "/dashboard"
-           element = {  <ProtectedRoute>
-             <Dashboard/>
-              </ProtectedRoute>}/>
+  <Route path = "browseNotes" element={               <ProtectedRoute>
+                    <BrowseNotes/>
+                    </ProtectedRoute>}/>
+                    <Route path="my-profile" element={<MyProfile />} />
+                    <Route path="add-material" element={<CreateNotePage />} />
 
-    <Route path="/user/:id" element={
-      <ProtectedRoute>
-        <UserDetails/>
-      </ProtectedRoute>
+
+    <Route path="my-uploads/:id" element={
+                        <ProtectedRoute>
+                          <UserDetails/>
+                        </ProtectedRoute>
       }/>
-    <Route path="/edit/:noteId" element={<EditForm />} />
 
+
+
+    </Route>
+
+    <Route path="edit/:noteId" element={<EditForm />} />
 
 
     </Routes>
