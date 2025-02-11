@@ -36,5 +36,11 @@ export const sidebarLinks = [
     name: "Status",
     path: "/dashboard/status",
     icon: "VscArchive",
+  },
+  {
+    id: 7,
+    name: "Pending Notes",
+    path: "/dashboard/pendingNotes",
+    icon: "VscArchive",
   }
 ]

@@ -5,18 +5,18 @@ const adminController = require('../controllers/adminController'); // Import adm
 const router = express.Router();
 
 // Signup route
-router.get('/welcome', authMiddleware, isAdmin, adminController.welcome);
+router.get('/welcome', authMiddleware, adminController.welcome);
 
 // Route to get all pending notes
-router.get('/getpendingNotes',authMiddleware,isAdmin, adminController.getPendingNotes);
+router.get('/getpendingNotes', adminController.getPendingNotes);
 
 // Route to approve a note
-router.patch('/approveNote/:noteId',authMiddleware,isAdmin, adminController.approveNote);
+router.patch('/approveNote/:noteId',authMiddleware, adminController.approveNote);
 
 // Route to reject a note
-router.patch('/rejectNote/:noteId',authMiddleware,isAdmin, adminController.rejectNote);
+router.patch('/rejectNote/:noteId',authMiddleware, adminController.rejectNote);
 
 // Route to get all reviewed notes (approved/rejected)
-router.get('/getAllReviewedNotes',authMiddleware,isAdmin, adminController.getAllReviewedNotes);
+router.get('/getAllReviewedNotes',authMiddleware, adminController.getAllReviewedNotes);
 
 module.exports = router;

@@ -4,15 +4,13 @@ import Sidebar from "../components/Sidebar";
 
 const Dashboard = () => {
   return (
-    <div className="flex">
-      {/* Sidebar Section */}
-      <div className="w-1/4 bg-gray-800 text-white p-4 min-h-screen">
-        <Sidebar />
-      </div>
+    <div className="flex bg-gradient-to-b from-gray-800 to-black min-h-screen">
+      {/* Sidebar with fixed width */}
+      <Sidebar className="w-64" />
 
-      {/* Main Content Section */}
-      <div className="w-3/4 p-4">
-        <Outlet /> {/* This will render BrowseNotes or other child routes */}
+      {/* Main Content Area */}
+      <div className="flex-1 p-4 transition-all duration-300 ml-6">
+        <Outlet />
       </div>
     </div>
   );

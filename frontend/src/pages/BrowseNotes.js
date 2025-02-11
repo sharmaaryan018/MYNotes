@@ -71,7 +71,7 @@ const BrowseNotes = () => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-gray-800 to-black text-white w-full h-full pt-20 px-6">
+    <div className="bg-gradient-to-b from-gray-800 to-black text-white w-full h-full pt px-6  ml-10">
       <h1 className="text-center text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 animate-pulse">
         Dashboard
       </h1>

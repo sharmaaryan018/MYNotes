@@ -14,6 +14,7 @@ import ContactUs from "./pages/ContactUs";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CreateNotePage from "./pages/CreateNotePage";
 import MyProfile from "./pages/MyProfile";
+import PendingNotes from "./pages/PendingNotes";
 
 
 
@@ -27,8 +28,11 @@ function App() {
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  return <div className="min-h-screen w-screen bg-zinc-900">
+  return <div className="min-h-screen w-screen ">
+    <div>
     <Navbar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn}/>
+
+    </div>
 
     <Routes>
 
@@ -59,8 +63,17 @@ function App() {
                         <ProtectedRoute>
                           <UserDetails/>
                         </ProtectedRoute>
+                        
       }/>
 
+
+
+<Route path="pendingNotes" element={
+                        <ProtectedRoute>
+                          <PendingNotes/>
+                        </ProtectedRoute>
+                        
+      }/>
 
 
     </Route>
