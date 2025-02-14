@@ -1,5 +1,6 @@
 const Note = require('../models/note');
 const User = require('../models/User');
+const College = require('../models/College'); // Import College model
 const  {uploadImage,deleteImagefromCloudinary} = require('../utils/cloudinaryHelper');
 const fs = require('fs/promises');
 const path = require('path');
@@ -329,3 +330,22 @@ exports.getUserById = async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+
+// Route to get only approved notes
+exports.approvedNotes = async (req, res) => {
+  try {
+    const notes = await Note.find({ status: 'Approved' })
+      .populate({
+        path: 'uploadedBy',
+        select: 'firstName lastName college', // Select required fields
+      })
+
+    res.status(200).json({sucess:true,message:"Approved Notes fetched successfully",notes});
+  } catch (error) {
+    console.error('Error fetching approved notes:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+

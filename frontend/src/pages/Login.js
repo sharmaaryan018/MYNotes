@@ -26,6 +26,7 @@ const Login = ({ setIsLoggedIn }) => {
     try {
       const response = await loginUser(formData, dispatch,navigate); // Call login API
       dispatch(setToken(response.token));
+      console.log("stored in setuserdata",response.data);
       dispatch(setUserData(response.user));
 
       localStorage.setItem("token", response.token);

@@ -15,9 +15,12 @@ const userSchema = new mongoose.Schema({
   token: { type: String }, // JWT Token for Authentication
   profileImage: { type: String }, // URL for Profile Picture
   college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },// College Reference
-   posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }], // References to alumni posts
-   note: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }],
-   createdAt: { type: Date, default: Date.now }, // Creation Time
+
+  posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
+   // References to alumni posts
+  note: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }],
+  
+  createdAt: { type: Date, default: Date.now }, // Creation Time
 });
 
 module.exports = mongoose.model('User', userSchema);

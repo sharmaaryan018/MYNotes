@@ -51,27 +51,20 @@ const signup = async (req, res) => {
     res.status(500).json({ message: 'Server error/ Unable to register', error: err.message || err });
   }
 };
-
-// Login controller for authenticating users
 const login = async (req, res) => {
   try {
-    // Get email and password from request body
     const { email, password } = req.body;
 
-    // Check if email or password is missing
     if (!email || !password) {
-      // Return 400 Bad Request status code with error message
       return res.status(400).json({
         success: false,
         message: `Please Fill up All the Required Fields`,
       });
     }
 
-    // Hardcoded admin credentials
     const adminEmail = "admin@example.com";
-    const adminPassword = "admin@123"; // Store secure passwords in environment variables in production
+    const adminPassword = "admin@123";
 
-    // Check if the credentials are for admin
     if (email === adminEmail && password === adminPassword) {
       const token = jwt.sign(
         { email: adminEmail, role: "admin" },
@@ -79,36 +72,29 @@ const login = async (req, res) => {
         { expiresIn: "24h" }
       );
 
-      // Set cookie for token and return success response
-      const options = {
-        expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-      };
-
-      return res.cookie("token", token, options).status(200).json({
-        success: true,
-        token,
-        user: {
-          email: adminEmail,
-          role: "admin",
-        },
-        message: `Admin Login Success`,
-      });
+      return res.cookie("token", token, { expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), httpOnly: true })
+        .status(200)
+        .json({
+          success: true,
+          token,
+          user: {
+            email: adminEmail,
+            role: "admin",
+            college: "N/A",
+          },
+          message: `Admin Login Success`,
+        });
     }
 
-    // Find user with provided email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("college");
 
-    // If user not found with provided email
     if (!user) {
-      // Return 401 Unauthorized status code with error message
       return res.status(401).json({
         success: false,
         message: `User is not Registered with Us. Please Sign Up to Continue`,
       });
     }
 
-    // Generate JWT token and compare password for non-admin users
     if (await bcrypt.compare(password, user.password)) {
       const token = jwt.sign(
         { email: user.email, id: user._id, role: user.role },
@@ -116,22 +102,17 @@ const login = async (req, res) => {
         { expiresIn: "24h" }
       );
 
-      // Save token to user document in database
       user.token = token;
-      console.log("Token saved to DB:", token);
       user.password = undefined;
 
-      // Set cookie for token and return success response
-      const options = {
-        expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-        httpOnly: true,
-      };
-      return res.cookie("token", token, options).status(200).json({
-        success: true,
-        token,
-        user,
-        message: `User Login Success`,
-      });
+      return res.cookie("token", token, { expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), httpOnly: true })
+        .status(200)
+        .json({
+          success: true,
+          token,
+          user,
+          message: `User Login Success`,
+        });
     } else {
       return res.status(401).json({
         success: false,
@@ -140,15 +121,12 @@ const login = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    // Return 500 Internal Server Error status code with error message
     return res.status(500).json({
       success: false,
       message: `Login Failure. Please Try Again`,
     });
   }
 };
-
-  
 
 module.exports = {
   signup,

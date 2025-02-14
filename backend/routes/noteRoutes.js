@@ -20,4 +20,6 @@ router.put('/editNote/:id',authMiddleware,uploadMiddleware.single("file"),noteCo
 
 router.get('/getUserById/:id', noteController.getUserById);
 
+router.get('/approvedNotes',noteController.approvedNotes)
+
 module.exports = router;

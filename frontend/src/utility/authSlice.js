@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  userData: JSON.parse(localStorage.getItem("user")) || null,
+  user: JSON.parse(localStorage.getItem("user")) || null,
   token: localStorage.getItem("token") || null,
-  isLoggedIn: !!localStorage.getItem("token"), // Set based on token presence
+  isLoggedIn: !!localStorage.getItem("token"),
   loading: false,
   error: null,
 };
@@ -13,15 +13,16 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setUserData(state, action) {
-      state.userData = action.payload;
-    },
-    setLoading(state, action) {
-      state.loading = action.payload;
+      state.user = action.payload;
+      localStorage.setItem("user", JSON.stringify(action.payload)); // Save user data
     },
     setToken(state, action) {
       state.token = action.payload;
-      state.isLoggedIn = !!action.payload; // Update isLoggedIn based on token
-      localStorage.setItem("token", action.payload); // Save token in localStorage
+      state.isLoggedIn = !!action.payload;
+      localStorage.setItem("token", action.payload);
+    },
+    setLoading(state, action) {
+      state.loading = action.payload;
     },
     setError(state, action) {
       state.error = action.payload;
@@ -29,7 +30,7 @@ const authSlice = createSlice({
     logout(state) {
       state.isLoggedIn = false;
       state.token = null;
-      state.userData = null;
+      state.user = null;
       state.error = null;
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -37,5 +38,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUserData, setLoading, setToken, setError, logout } = authSlice.actions;
+export const { setUserData, setToken, setLoading, setError, logout } = authSlice.actions;
 export default authSlice.reducer;
