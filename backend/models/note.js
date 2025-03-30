@@ -13,6 +13,17 @@ const notesSchema = new mongoose.Schema({
   },
 
   type: { type: String, enum: ['Note', 'PYQ'] },
+  pyqType: { 
+    type: String, 
+    enum: ['mid-sem', 'end-sem'],
+    required: function() { return this.type === 'PYQ'; }
+  },
+  paperYear: {
+    type: Number,
+    required: function() { return this.type === 'PYQ'; },
+    min: 2000,
+    max: new Date().getFullYear()
+  },
   department: { type: String}, // Department (for Students only)
 
   subject: { type: String},
@@ -20,6 +31,10 @@ const notesSchema = new mongoose.Schema({
   year: { type: Number}, // Year (e.g., 1st, 2nd, 3rd, 4th)
   college: { type:String},
   status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+  bookmarkedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
   rejectionReason: { type: String },
   averageRating: { type: Number, default: 0 }, // Average rating of the note
   reviewCount: { type: Number, default: 0 }, // Number of reviews for the note

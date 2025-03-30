@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
 import notesReducer from "./notesSlice"
+import bookmarkReducer from "./bookmarkSlice";
 
-const store = configureStore({
+export const store = configureStore({
     reducer: {
         auth: authReducer,
         notes:notesReducer,
+        bookmark: bookmarkReducer,
       },
 })
 

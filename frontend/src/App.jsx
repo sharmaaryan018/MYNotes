@@ -12,10 +12,15 @@ import EditForm from "./pages/EditForm";
 import About from "./pages/About";
 import ContactUs from "./pages/ContactUs";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CreateNotePage from "./pages/CreateNotePage";
+import NoteForm from "./pages/NoteForm";
 import MyProfile from "./pages/MyProfile";
 import PendingNotes from "./pages/PendingNotes";
-
+import AdminDashboard from "./pages/AdminDashboard";
+import ApprovedNotesPage from "./pages/ApprovedNotes";
+import RejectedNotes from "./pages/RejectedNotes";
+import Bookmarks from "./pages/Bookmarks";
+import Status from "./pages/Status";
+import StudentDashboard from "./pages/StudentDashboard";
 
 
 function App() {
@@ -25,6 +30,7 @@ function App() {
   // console.log(user);
   // const {id} = user;
   // console.log("userId",id)
+
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -40,11 +46,11 @@ function App() {
     <Route path = "/about" element = {<About/>}/>
     <Route path = "/contact" element = {<ContactUs/>}/>
 
-    <Route path="/create-note" element={<CreateNotePage />} />
 
 
     <Route path = "/login" element = {<Login setIsLoggedIn={setIsLoggedIn}/>}/>
     <Route path = "/signup" element = {<Signup setIsLoggedIn={setIsLoggedIn}/>}/>
+
 
     <Route 
     path ="/dashboard"
@@ -52,18 +58,26 @@ function App() {
       <Dashboard/>
     </ProtectedRoute>}>
     
-  <Route path = "browseNotes" element={               <ProtectedRoute>
+  <Route path = "studentdashboard" element={<StudentDashboard />} />
+  <Route path = "browseNotes" element={<ProtectedRoute>
                     <BrowseNotes/>
                     </ProtectedRoute>}/>
                     <Route path="my-profile" element={<MyProfile />} />
-                    <Route path="add-material" element={<CreateNotePage />} />
-
+                    <Route path="add-material" element={<NoteForm />} />
+                    <Route path="edit/:noteId" element={<NoteForm />} />
+                    <Route path="bookmarks" element={<Bookmarks />} />
+                    <Route path="status" element={<Status />} />
+        
 
     <Route path="my-uploads/:id" element={
                         <ProtectedRoute>
                           <UserDetails/>
-                        </ProtectedRoute>
-                        
+                        </ProtectedRoute>                
+      }/>
+         <Route path="admin" element={
+                        <ProtectedRoute>
+                          <AdminDashboard/>
+                        </ProtectedRoute>                
       }/>
 
                         
@@ -74,6 +88,19 @@ function App() {
 <Route path="pendingNotes" element={
                         <ProtectedRoute>
                           <PendingNotes/>
+                        </ProtectedRoute>
+                        
+      }/>
+<Route path="approvedNotes" element={
+                        <ProtectedRoute>
+                          <ApprovedNotesPage/>
+                        </ProtectedRoute>
+                        
+      }/>
+
+<Route path="rejectedNotes" element={
+                        <ProtectedRoute>
+                          <RejectedNotes/>
                         </ProtectedRoute>
                         
       }/>

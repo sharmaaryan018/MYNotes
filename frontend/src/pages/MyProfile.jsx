@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setUserData } from "../utility/authSlice";
+import { setUserData, updateProfileImage } from "../utility/authSlice";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const MyProfile = () => {
   const dispatch = useDispatch();
@@ -21,6 +23,10 @@ const MyProfile = () => {
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const getAvatarUrl = (firstName, lastName) => {
+    return `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=2563eb&color=fff&size=256&bold=true&font-size=0.5`;
+  };
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -30,9 +36,9 @@ const MyProfile = () => {
         year: user.year || "",
         department: user.department || "",
         about: user.about || "",
-        college: user.college.name|| "", 
+        college: user.college?.name || "",
       });
-      setProfileImage(user.profileImage);
+      setProfileImage(user.profileImage || getAvatarUrl(user.firstName, user.lastName));
     }
   }, [user]);
 
@@ -40,23 +46,89 @@ const MyProfile = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a valid image file (JPEG, PNG)');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('profileImage', file);
+
+      const response = await axios.post(
+        `http://localhost:5000/api/users/upload-profile-image/${user._id}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      if (response.data.success) {
+        const imageUrl = response.data.profileImage;
+        setProfileImage(imageUrl);
+        dispatch(updateProfileImage(imageUrl));
+        toast.success('Profile image updated successfully');
+      } else {
+        throw new Error(response.data.message || 'Failed to update profile image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error(error.message || 'Failed to upload image');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg border border-gray-200">
       <h2 className="text-3xl font-semibold text-gray-800 mb-6 text-center">My Profile</h2>
 
       <div className="flex flex-col items-center space-y-4">
-        <img
-          src={profileImage || "/default-avatar.png"}
-          alt="Profile"
-          className="w-28 h-28 rounded-full border-2 border-gray-300 shadow-sm object-cover"
+        <div className="relative group">
+          <img
+            src={profileImage}
+            alt="Profile"
+            className="w-28 h-28 rounded-full border-2 border-gray-300 shadow-sm object-cover"
+            onError={(e) => {
+              e.target.src = getAvatarUrl(formData.firstName, formData.lastName);
+            }}
+          />
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full">
+              <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
+            </div>
+          )}
+          
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-full flex items-center justify-center transition-all duration-300">
+            <label
+              htmlFor="profile-upload"
+              className="cursor-pointer text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            >
+              Change Photo
+            </label>
+          </div>
+        </div>
+
+        <input
+          type="file"
+          id="profile-upload"
+          accept="image/png, image/jpeg, image/jpg"
+          className="hidden"
+          onChange={handleImageUpload}
         />
-        <label
-          htmlFor="upload-profile"
-          className="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-        >
-          Change Photo
-        </label>
-        <input type="file" accept="image/*" className="hidden" id="upload-profile" />
       </div>
 
       <div className="grid grid-cols-2 gap-4 mt-6">
@@ -77,10 +149,13 @@ const MyProfile = () => {
       </div>
 
       <div className="flex justify-center space-x-4 mt-6">
-        <button className="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-600">
+        <button 
+          className="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-600 transition-colors duration-200"
+          disabled={loading}
+        >
           {loading ? "Updating..." : "Update Profile"}
         </button>
-        <button className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600">
+        <button className="bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-600 transition-colors duration-200">
           Delete Account
         </button>
       </div>

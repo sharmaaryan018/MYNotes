@@ -10,13 +10,16 @@ router.get('/welcome', authMiddleware, adminController.welcome);
 // Route to get all pending notes
 router.get('/getpendingNotes', adminController.getPendingNotes);
 
+router.get('/rejectedNotes', adminController.getRejectedNotes);
+
+
 // Route to approve a note
-router.patch('/approveNote/:noteId',authMiddleware, adminController.approveNote);
+router.patch('/approveNote/:id', adminController.approveNote);
 
 // Route to reject a note
 router.patch('/rejectNote/:noteId',authMiddleware, adminController.rejectNote);
 
 // Route to get all reviewed notes (approved/rejected)
-router.get('/getAllReviewedNotes',authMiddleware, adminController.getAllReviewedNotes);
+// router.get('/getAllReviewedNotes',authMiddleware, adminController.getAllReviewedNotes);
 
 module.exports = router;

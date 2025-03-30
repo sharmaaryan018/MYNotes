@@ -6,6 +6,7 @@ const EditForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userDetails = location.state?.userDetails;
+  const returnPath = location.state?.returnPath || '/';
 
   if (!userDetails) {
     return <p>No user details found to edit.</p>;
@@ -65,13 +66,17 @@ const EditForm = () => {
       console.log("Updated note response:", response.data);
 
       alert("Note updated successfully!");
-      navigate(-1); // Navigate back
+      navigate(-1);
     } catch (err) {
       console.error("Failed to update the note:", err);
       alert("Failed to update the note.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSuccessfulEdit = () => {
+    navigate(returnPath);
   };
 
   return (

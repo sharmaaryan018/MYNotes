@@ -6,6 +6,7 @@ const initialState = {
   isLoggedIn: !!localStorage.getItem("token"),
   loading: false,
   error: null,
+  profileImage: null,
 };
 
 const authSlice = createSlice({
@@ -14,6 +15,8 @@ const authSlice = createSlice({
   reducers: {
     setUserData(state, action) {
       state.user = action.payload;
+      state.isLoggedIn = true;
+      state.profileImage = action.payload.profileImage || null;
       localStorage.setItem("user", JSON.stringify(action.payload)); // Save user data
     },
     setToken(state, action) {
@@ -28,15 +31,22 @@ const authSlice = createSlice({
       state.error = action.payload;
     },
     logout(state) {
+      state.user = null;
       state.isLoggedIn = false;
       state.token = null;
-      state.user = null;
+      state.profileImage = null;
       state.error = null;
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     },
+    updateProfileImage(state, action) {
+      state.profileImage = action.payload;
+      if (state.user) {
+        state.user.profileImage = action.payload;
+      }
+    },
   },
 });
 
-export const { setUserData, setToken, setLoading, setError, logout } = authSlice.actions;
+export const { setUserData, setToken, setLoading, setError, logout, updateProfileImage } = authSlice.actions;
 export default authSlice.reducer;

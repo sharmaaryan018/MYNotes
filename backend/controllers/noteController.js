@@ -32,7 +32,7 @@ exports.createNote = async (req, res) => {
       });
     }
 
-    const { title, description, type, subject, semester, year } = req.body;
+    const { title, description, type, subject, semester, year, pyqType, department, paperYear } = req.body;
     let college = req.body.college;
 
     if (!college) {
@@ -55,6 +55,14 @@ exports.createNote = async (req, res) => {
       });
     }
 
+    // Validate PYQ type if note type is PYQ
+    if (type === 'PYQ' && !['mid-sem', 'end-sem'].includes(pyqType)) {
+      return res.status(400).json({
+        success: false,
+        message: "For PYQ type notes, please specify if it's mid-sem or end-sem",
+      });
+    }
+
     // Check for existing note with same file
     const existingNote = await Note.findOne({ noteId: public_id });
     if (existingNote) {
@@ -71,10 +79,13 @@ exports.createNote = async (req, res) => {
       noteId: public_id,
       uploadedBy: req.user.id,
       type,
+      department,
       subject,
       semester,
       year,
       college,
+      pyqType: type === 'PYQ' ? pyqType : undefined,
+      paperYear: type === 'PYQ' ? paperYear : undefined
     });
 
     try {
@@ -179,9 +190,8 @@ exports.editNote = async (req, res) => {
   try {
     console.log("editing................................");
     const noteId = req.params.id;
-    console.log("pid",noteId )
-    const userId = req.user.id; // Assuming the user ID is available in `req.user`
-    console.log("uid",userId )
+    const userId = req.user.id;
+    const userRole = req.user.role; // Assuming role is available in req.user
 
     // Find the note by ID
     const note = await Note.findById(noteId);
@@ -193,8 +203,11 @@ exports.editNote = async (req, res) => {
       });
     }
 
-    // Ensure the user has permission to edit the note
-    if (note.uploadedBy.toString() !== userId) {
+    // Check if user is either the note owner or an admin
+    const isNoteOwner = note.uploadedBy.toString() === userId;
+    const isAdmin = userRole === 'admin';
+
+    if (!isNoteOwner && !isAdmin) {
       return res.status(403).json({ 
         success: false, 
         message: 'You are not authorized to edit this note' 
@@ -217,6 +230,16 @@ exports.editNote = async (req, res) => {
     if (subject) note.subject = subject;
     if (semester) note.semester = semester;
     if (year) note.year = year;
+    if (req.body.department) note.department = req.body.department;
+    if (req.body.college) note.college = req.body.college;
+    if (req.body.semester) note.semester = req.body.semester;
+    if (req.body.pyqType) note.pyqType = req.body.pyqType;
+    if (req.body.paperYear) note.paperYear = req.body.paperYear;
+
+     // Set status back to Pending when note is edited
+     note.status = "Pending";
+     note.rejectionReason = ""; // Clear any previous rejection reason
+ 
 
     // Handle optional file update
     if (req.file) {
@@ -336,16 +359,71 @@ exports.getUserById = async (req, res) => {
 // Route to get only approved notes
 exports.approvedNotes = async (req, res) => {
   try {
+
+    const userId = req.user._id;
+    console.log("Useridddddddddddddddddd",userId);
     const notes = await Note.find({ status: 'Approved' })
       .populate({
         path: 'uploadedBy',
-        select: 'firstName lastName college', // Select required fields
+        select: 'firstName lastName college profileImage', // Added profileImage
       })
 
-    res.status(200).json({sucess:true,message:"Approved Notes fetched successfully",notes});
+    res.status(200).json({success:true, message:"Approved Notes fetched successfully", notes});
   } catch (error) {
     console.error('Error fetching approved notes:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// GET admin dashboard stats
+exports.stats =( async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalNotes = await Note.countDocuments();
+    const pendingNotes = await Note.countDocuments({ status: "Pending" });
+    const approvedNotes = await Note.countDocuments({ status: "Approved" });
+    const rejectedNotes = await Note.countDocuments({ status: "Rejected" });
+
+    res.json({ totalUsers, totalNotes, pendingNotes, approvedNotes, rejectedNotes });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error });
+  }
+});
+
+exports.getUserStats = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    const stats = await Note.aggregate([
+      { $match: { uploadedBy: userId } },
+      {
+        $group: {
+          _id: null,
+          totalNotes: { $sum: 1 },
+          pendingNotes: {
+            $sum: { $cond: [{ $eq: ['$status', 'Pending'] }, 1, 0] }
+          },
+          approvedNotes: {
+            $sum: { $cond: [{ $eq: ['$status', 'Approved'] }, 1, 0] }
+          },
+          rejectedNotes: {
+            $sum: { $cond: [{ $eq: ['$status', 'Rejected'] }, 1, 0] }
+          }
+        }
+      }
+    ]);
+
+    const defaultStats = {
+      totalNotes: 0,
+      pendingNotes: 0,
+      approvedNotes: 0,
+      rejectedNotes: 0
+    };
+
+    res.status(200).json(stats[0] || defaultStats);
+  } catch (error) {
+    console.error('Error fetching user stats:', error);
+    res.status(500).json({ message: 'Error fetching user statistics' });
   }
 };
 

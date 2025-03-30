@@ -1,58 +1,80 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { sidebarLinks } from "../common/sidebarLinks";
 import * as VscIcons from "react-icons/vsc";
 
-const Sidebar = () => {
+const Sidebar = ({ onExpandChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const iconSize = 24; // Icon size
-  const collapsedWidth = iconSize + 12; // Sidebar width when collapsed
+  const location = useLocation();
+  const iconSize = 24;
+  const collapsedWidth = iconSize + 16;
+
+  const handleExpand = (expanded) => {
+    setIsExpanded(expanded);
+    onExpandChange?.(expanded);
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  }; 
 
   return (
     <div
-      className={`fixed top-0 left-0 h-screen transition-all duration-300 shadow-lg
-                  ${isExpanded ? "w-1/5 bg-gray-800 px-4 py-6" : `w-[${collapsedWidth}px] bg-gray-900 px-2 py-4`}
-                  ${isExpanded ? "rounded-none" : "rounded-full border-2 border-yellow-500 overflow-hidden"}`}
+      className={`fixed top-16 left-0 h-[calc(100vh-4rem)] z-30 transition-all duration-300 shadow-lg
+                  ${isExpanded ? "w-64" : `w-[${collapsedWidth}px]`} 
+                  bg-white border-r border-gray-200`}
     >
-      <ul className="space-y-4 flex flex-col items-center mt-10 text-white">
-        {sidebarLinks.map((link) => {
-          const IconComponent = VscIcons[link.icon];
+      <div className="h-full flex flex-col justify-between">
+        <ul className="space-y-1 flex flex-col items-center p-3">
+          {sidebarLinks.map((link) => {
+            const IconComponent = VscIcons[link.icon];
+            const active = isActive(link.path);
 
-          return (
-            <li key={link.id} className="flex justify-center w-full">
-              <Link
-                to={link.path}
-                className={`flex items-center p-2 rounded transition-all duration-300 w-full
-                            ${selectedId === link.id ? "bg-gray-700 text-yellow-400" : "hover:bg-gray-700"}`}
-                onClick={() => {
-                  setIsExpanded(true);
-                  setSelectedId(link.id);
-                }}
-              >
-                {IconComponent && <IconComponent size={iconSize} />}
-                <span
-                  className={`ml-2 transition-opacity duration-300 ${
-                    isExpanded ? "opacity-100" : "opacity-0 w-0"
-                  }`}
+            return (
+              <li key={link.id} className="w-full">
+                <Link
+                  to={link.path}
+                  className={`flex items-center p-2 rounded-lg transition-all duration-300 w-full
+                            ${active 
+                              ? "bg-blue-50 text-blue-600" 
+                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+                  onClick={() => {
+                    handleExpand(true);
+                    setSelectedId(link.id);
+                  }}
                 >
-                  {link.name}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                  {IconComponent && (
+                    <IconComponent 
+                      size={iconSize} 
+                      className={active ? "text-blue-600" : "text-gray-600"}
+                    />
+                  )}
+                  <span
+                    className={`ml-3 font-medium transition-opacity duration-300 ${
+                      isExpanded ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
+                    }`}
+                  >
+                    {link.name}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
 
-      {/* Close Button */}
-      {isExpanded && (
-        <button
-          className="mt-4 w-full text-center p-2 bg-red-600 rounded hover:bg-red-500"
-          onClick={() => setIsExpanded(false)}
-        >
-          Close
-        </button>
-      )}
+        {/* Close Button */}
+        {isExpanded && (
+          <div className="p-4">
+            <button
+              className="w-full py-2 px-4 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors border border-gray-200"
+              onClick={() => handleExpand(false)}
+            >
+              Close
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

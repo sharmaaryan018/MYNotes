@@ -13,14 +13,23 @@ const userSchema = new mongoose.Schema({
   department: { type: String, function() { return this.role === 'Student'; } }, // Department (for Students only)
   about: { type: String, maxlength: 500 }, // Short Bio/About
   token: { type: String }, // JWT Token for Authentication
-  profileImage: { type: String }, // URL for Profile Picture
-  college: { type: mongoose.Schema.Types.ObjectId, ref: 'College' },// College Reference
-
+  profileImage: {
+    type: String,
+    default: function() {
+      // Will be set when creating new user
+      return `https://ui-avatars.com/api/?name=${this.firstName}+${this.lastName}&background=random&color=fff`;
+    }
+  }, // URL for Profile Picture
+  college: { type: mongoose.Schema.Types.ObjectId, ref: 'College', required: true },// College Reference
+  bookmarkedNotes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Note'
+  }],
   posts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
    // References to alumni posts
   note: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }],
   
   createdAt: { type: Date, default: Date.now }, // Creation Time
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

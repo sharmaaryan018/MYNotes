@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const noteController = require('../controllers/noteController');
 const {authMiddleware,isStudent} = require('../middleware/authMiddleware');
-const uploadMiddleware = require('../middleware/uploadMiddleware')
+const uploadMiddleware = require('../middleware/uploadMiddleware');
+const note = require('../models/note');
 
 
 
@@ -20,6 +21,10 @@ router.put('/editNote/:id',authMiddleware,uploadMiddleware.single("file"),noteCo
 
 router.get('/getUserById/:id', noteController.getUserById);
 
-router.get('/approvedNotes',noteController.approvedNotes)
+router.get('/approvedNotes',authMiddleware,noteController.approvedNotes)
+
+router.get("/stats",noteController.stats)
+
+router.get('/getUserStats/:userId', noteController.getUserStats);
 
 module.exports = router;

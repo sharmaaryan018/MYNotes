@@ -1,6 +1,16 @@
-
-
 export const sidebarLinks = [
+  {
+    id: 11,
+    name: "Home",
+    path: "/dashboard",
+    icon: "VscHome",
+  },
+  {
+    id: 12,
+    name: "Student Dashboard",
+    path: "/dashboard/studentdashboard",
+    icon: "VscHome",
+  },
   {
     id: 1,
     name: "My Profile",
@@ -27,20 +37,38 @@ export const sidebarLinks = [
   },
   {
     id: 5,
-    name: "Cart",
-    path: "/dashboard/bookmarks",
-    icon: "VscArchive",
+    name: "Bookmarks",
+    path: "/dashboard/bookmarks",    
+    icon: "VscBookmark",
   },
   {
     id: 6,
     name: "Status",
     path: "/dashboard/status",
-    icon: "VscArchive",
+    icon: "VscInfo",
   },
   {
     id: 7,
+    name: "Admin Dashboard",
+    path: "/dashboard/admin",
+    icon: "VscDashboard",
+  },
+  {
+    id: 8,
     name: "Pending Notes",
     path: "/dashboard/pendingNotes",
-    icon: "VscArchive",
+    icon: "VscEye",
+  },
+  {
+    id: 9,
+    name: "Approved Notes",
+    path: "/dashboard/approvedNotes",
+    icon: "VscCheck",
+  },
+  {
+    id: 10,
+    name: "Rejected Notes",
+    path: "/dashboard/rejectedNotes",
+    icon: "VscClose",
   }
 ]

@@ -27,7 +27,8 @@ exports.getAllNotes = async (req, res) => {
 // Get all pending notes
 exports.getPendingNotes = async (req, res) => {
     try {
-      const pendingNotes = await Note.find({ status: 'Pending' }).populate('uploadedBy', 'name email').populate('college', 'name');
+      const pendingNotes = await Note.find({ status: 'Pending' }).populate('uploadedBy', 'firstName lastName ').populate('college', 'name')
+      .sort({ createdAt: -1 }); // Add this line to sort by newest first
       res.status(200).json({
         success: true,
         notes: pendingNotes,
@@ -44,13 +45,22 @@ exports.getPendingNotes = async (req, res) => {
   // Approve a note
   exports.approveNote = async (req, res) => {
     try {
-      const { noteId } = req.params;
-  
-      const note = await Note.findById(noteId);
+      const note = await Note.findById(req.params.id);
+      console.log('Attempting to approve note with ID:', req.params.id); // Add logging
+
+      
       if (!note) {
         return res.status(404).json({
           success: false,
-          message: 'Note not found',
+          message: "Note not found"
+        });
+      }
+  
+      // If it's a PYQ note, verify required fields
+      if (note.type === 'PYQ' && (!note.pyqType || !note.paperYear)) {
+        return res.status(400).json({
+          success: false,
+          message: "PYQ notes require both pyqType and paperYear fields"
         });
       }
   
@@ -59,17 +69,16 @@ exports.getPendingNotes = async (req, res) => {
   
       res.status(200).json({
         success: true,
-        message: 'Note approved successfully',
+        message: "Note approved successfully"
       });
-    } catch (error) {
+    } catch (err) {
       res.status(500).json({
         success: false,
-        message: 'Failed to approve note',
-        error: error.message,
+        message: "Failed to approve note",
+        error: err.message
       });
     }
   };
-  
   // Reject a note
   exports.rejectNote = async (req, res) => {
     try {
@@ -83,6 +92,7 @@ exports.getPendingNotes = async (req, res) => {
         });
       }
   
+      // Find the note but don't run validation on update
       const note = await Note.findById(noteId);
       if (!note) {
         return res.status(404).json({
@@ -91,15 +101,25 @@ exports.getPendingNotes = async (req, res) => {
         });
       }
   
-      note.status = 'Rejected';
-      note.rejectionReason = rejectionReason; // Add a new field in your schema for rejection reason if needed
-      await note.save();
+      // Update note status and rejection reason using findByIdAndUpdate to skip validation
+      await Note.findByIdAndUpdate(
+        noteId,
+        {
+          status: 'Rejected',
+          rejectionReason: rejectionReason,
+        },
+        {
+          runValidators: false, // Skip validation
+          new: true
+        }
+      );
   
       res.status(200).json({
         success: true,
         message: 'Note rejected successfully',
       });
     } catch (error) {
+      console.error('Error rejecting note:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to reject note',
@@ -109,21 +129,47 @@ exports.getPendingNotes = async (req, res) => {
   };
   
   // Get all notes (Approved or Rejected) for admin review
-  exports.getAllReviewedNotes = async (req, res) => {
-    try {
-      const notes = await Note.find({ status: { $in: ['Approved', 'Rejected'] } })
-        .populate('uploadedBy', 'name email')
-        .populate('college', 'name');
-      res.status(200).json({
-        success: true,
-        notes,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to fetch reviewed notes',
-        error: error.message,
-      });
-    }
-  };
+// Get all rejected notes for admin review
+exports.getRejectedNotes = async (req, res) => {
+  try {
+    // Fetch only rejected notes
+    const notes = await Note.find({ status: 'Rejected' })
+      .populate({
+        path: 'uploadedBy',
+        select: 'firstName lastName email college',
+        populate: {
+          path: 'college',
+          select: 'name'
+        }
+      })
+      .sort({ createdAt: -1 }); // Sort by most recent
+
+    res.status(200).json({
+      success: true,
+      notes: notes.map((note) => ({
+        _id: note._id,
+        title: note.title,
+        subject: note.subject,
+        type: note.type,
+        file: note.file,
+        rejectionReason: note.rejectionReason,
+        rejectedAt: note.rejectedAt, // Add rejectedAt field
+        createdAt: note.createdAt,
+        uploadedBy: {
+          _id: note.uploadedBy?._id,
+          name: note.uploadedBy
+            ? `${note.uploadedBy.firstName} ${note.uploadedBy.lastName}`
+            : 'Deleted User',
+          college: note.uploadedBy?.college?.name || 'Not specified',
+        },
+      })),
+    });
+  } catch (error) {
+    console.error('Error fetching rejected notes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+    });
+  }
+};
 

@@ -28,24 +28,32 @@ const signup = async (req, res) => {
       console.log(`New college created: ${college}`);
     }
 
-    // Create the user with the College ObjectId
+    // Generate avatar URL
+    const avatarUrl = `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random&color=fff`;
+    
+    // Create the user with the College ObjectId and profileImage
     const user = new User({
       firstName,
       lastName,
       email,
       password: hashedPassword,
-      role: role || 'user',
+      role,
       college: collegeDoc._id,
       department:"",
       year:"",
-      
-       // Use the ObjectId of the college
+      profileImage: avatarUrl
     });
 
     // Save the user to the database
     await user.save();
 
-    res.status(201).json({ message: 'User registered successfully',user });
+    res.status(201).json({ 
+      message: 'User registered successfully',
+      user: {
+        ...user._doc,
+        password: undefined
+      }
+    });
   } catch (err) {
     console.error(err); // Log the error to the console for debugging
     res.status(500).json({ message: 'Server error/ Unable to register', error: err.message || err });
